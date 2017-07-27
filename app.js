@@ -18,6 +18,7 @@
   };
 
   function run() {
+    var URL = "https://jarvis-note.azurewebsites.net/hello?q=";
     
     return OneNote.run(function (context) {
       console.log('/////////////');
@@ -65,7 +66,18 @@
                 var richText = richTextParagraph.richText;
                 console.log("Paragraph found with richtext content : " + richText.text);
 
-                
+                function callback(data, status) {
+                  console.log('WE GOT RESULTS', data, status);
+                    $("#results").empty();
+                  data.forEach(function(element) {
+                    console.log('HERE ARE THE ELEMENTS', element);
+                     $("#results").append('<li>'+element+'</li>');
+                  }, this);
+                 
+                }
+                var URLtoSend = URL + richText.text;
+                $.get(URLtoSend,callback);
+                console.log('are you breaking');
             });
             return context.sync();
         });
