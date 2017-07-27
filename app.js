@@ -91,8 +91,8 @@ function findQuery(paragraph) {
         if (query[i] === " ") {
             cnt++;
         }
-        if (cnt === 4 || i === 0) {
-            return query.substring(i, query.length);
+        if (cnt === 10 || i === 0) {
+            return query.substring(i, query.length).trim();
         }
     }
 }
@@ -106,9 +106,14 @@ function removeLastLine(text)
             flag = true;
         }
 
-        if ((text[i] === "." && flag) || i === 0)
+        if (text[i] === "." && flag)
         {
             return text.substring(0,i+1);
+        }
+
+        if(i === 0)
+        {
+            return "";
         }
     }
 }
