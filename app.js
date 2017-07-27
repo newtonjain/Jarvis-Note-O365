@@ -11,15 +11,11 @@
     Office.initialize = function (reason) {
         $(document).ready(function () {
             $('#run').click(run);
-
             setInterval(run, 3000);
-
         });
     };
 
     function run() {
-        var URL = "https://jarvis-note.azurewebsites.net/hello?q=";
-
         return OneNote.run(function (context) {
             console.log('/////////////');
             // Get the collection of pageContent items from the page.
@@ -61,9 +57,9 @@
                 .then(function () {
                     // Display all rich text paragraphs to the console
                     $.each(richTextParagraphs, function (index, richTextParagraph) {
-                        var query = findQuery(richTextParagraph.richText);
+                        var query = findQuery(richTextParagraph.richText.text);
                         console.log("Query : " + query);
-                        fetchAndDisplay(query);
+                        fetchAndDisplay(context, richTextParagraph, query);
                     });
                     return context.sync();
                 });
@@ -79,49 +75,87 @@
 })();
 
 function findQuery(paragraph) {
-    sentences = paragraph.split('.');
+    console.log("fqy". paragraph);
+    var sentences = paragraph.split('.');
     var query = null
     for (var i = sentences.length - 1; i >= 0; i--) {
-        sentence = sentences[i];
+        var sentence = sentences[i];
         if (sentence.length > 0) {
             query = sentence;
             break;
         }
     }
 
-    cnt = 0;
+    var cnt = 0;
     for (var i = query.length - 1; i >= 0; i--) {
         if (query[i] === " ") {
             cnt++;
         }
         if (cnt === 4 || i === 0) {
-            return query.substring(i, query.length - 1);
+            return query.substring(i, query.length);
         }
     }
 }
 
-function callback(data) {
+function removeLastLine(text)
+{
+    var flag = false;
+    for (var i = text.length - 1; i >= 0; i--) {
+        if(text[i] != " " && text[i] != ".")
+        {
+            flag = true;
+        }
+
+        if ((text[i] === "." && flag) || i === 0)
+        {
+            return text.substring(0,i+1);
+        }
+    }
+}
+
+function onItemClick(context, richTextParagraph, element)
+{
+    var text = removeLastLine(richTextParagraph.richText.text);
+    richTextParagraph.insertHtmlAsSibling("After", text+" "+element);
+    richTextParagraph.delete();
+
+    context.sync();
+}
+
+function callback(context, richTextParagraph, data) {
     console.log('WE GOT RESULTS', data, status);
     $("#results").empty();
+    var cnt = 0;
     data.forEach(function (element) {
+        cnt++;
         console.log('HERE ARE THE ELEMENTS', element);
-        $("#results").append('<li>' + element + '</li>');
+        $("#results").append('<li id="id'+cnt+'">' + element + '</li>');
+        document.getElementById("id"+cnt).addEventListener('click', function(){
+            onItemClick(context, richTextParagraph, element);
+        });
     }, this);
 }
 
+var URL = "https://jarvis-note.azurewebsites.net/hello?q=";
 var cache = {}
-function fetchAndDisplay(query) {
+function fetchAndDisplay(context, richTextParagraph, query) {
     if (cache.hasOwnProperty(query)) {
-        callback(cache[query]);
+        //callback(cache[query]);
+        return;
     }
     else {
         cache = {}
     }
 
     var URLtoSend = URL + query;
+    console.log("Getting results");
     $.get(URLtoSend).then(function(data, status)
     {
-        cache[query] = data
-        callback(data);
+        if(status === "success")
+        {
+            cache[query] = data;
+            callback(context, richTextParagraph, data);
+        }
     });
 }
+
