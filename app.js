@@ -121,14 +121,15 @@ function removeLastLine(text)
 function onItemClick(context, richTextParagraph, element)
 {
     var text = removeLastLine(richTextParagraph.richText.text);
-    richTextParagraph.insertHtmlAsSibling("After", text+" "+element);
+    richTextParagraph.insertHtmlAsSibling("After", text+' <font color="green"><b>'+element+'</b></font>');
     richTextParagraph.delete();
 
     context.sync();
 }
 
-function callback(context, richTextParagraph, data) {
+function callback(context, richTextParagraph, data, query) {
     console.log('WE GOT RESULTS', data, status);
+     $("#query").text('Searching for : ' + query);
     $("#results").empty();
     var cnt = 0;
     data.forEach(function (element) {
@@ -159,7 +160,7 @@ function fetchAndDisplay(context, richTextParagraph, query) {
         if(status === "success")
         {
             cache[query] = data;
-            callback(context, richTextParagraph, data);
+            callback(context, richTextParagraph, data, query);
         }
     });
 }
