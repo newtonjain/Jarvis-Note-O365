@@ -130,6 +130,7 @@ function onItemClick(context, richTextParagraph, element)
 function callback(context, richTextParagraph, data, query) {
     console.log('WE GOT RESULTS', data, status);
      $("#query").text('Searching for : ' + query);
+     document.getElementById("onboard").style.display = "none";
     $("#results").empty();
     var cnt = 0;
     data.forEach(function (element) {
@@ -142,7 +143,7 @@ function callback(context, richTextParagraph, data, query) {
     }, this);
 }
 
-var URL = "https://jarvis-note.azurewebsites.net/hello?q=";
+var URL = "https://jarvis-note1.azurewebsites.net/hello?q=";
 var cache = {}
 function fetchAndDisplay(context, richTextParagraph, query) {
     if (cache.hasOwnProperty(query)) {
